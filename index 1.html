@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#2e7d32">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Gau Dairy – Cow & Buffalo Management</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{background:#f1f5ee;color:#1f2a1f;max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:80px}
+header{background:linear-gradient(135deg,#2e7d32,#37474f);color:#fff;padding:16px;position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:20px}header small{opacity:.85;font-size:12px}
+.lang{background:rgba(255,255,255,.2);border:none;color:#fff;padding:6px 10px;border-radius:16px;font-weight:600}
+main{padding:12px}
+.page{display:none}.page.active{display:block}
+.card{background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat{background:#fff;border-radius:14px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-top:4px solid #2e7d32}
+.stat.buf{border-top-color:#455a64}.stat.buf .v{color:#37474f}
+.stat .v{font-size:22px;font-weight:700;color:#2e7d32}
+.stat .l{font-size:12px;color:#667}
+.stat .s{font-size:12px;color:#445;margin-top:4px}
+.stat.warn{border-top-color:#e65100}.stat.warn .v{color:#e65100}
+h2{font-size:16px;margin-bottom:10px}
+label{font-size:13px;color:#555;display:block;margin:8px 0 4px}
+input,select{width:100%;padding:12px;border:1px solid #cfd8cc;border-radius:10px;font-size:16px;background:#fafcf9}
+.row{display:flex;gap:8px}.row>*{flex:1;min-width:0}
+.btn{width:100%;padding:14px;border:none;border-radius:12px;background:#2e7d32;color:#fff;font-size:16px;font-weight:600;margin-top:12px}
+.btn.sec{background:#e8f0e5;color:#2e7d32}
+.btn.small{width:auto;padding:6px 10px;font-size:13px;margin:0}
+.btn.del{background:#ffebee;color:#c62828}
+.seg{display:flex;background:#e8f0e5;border-radius:12px;padding:4px;gap:4px;margin-bottom:6px}
+.seg button{flex:1;padding:10px;border:none;border-radius:9px;background:none;font-size:15px;font-weight:600;color:#556}
+.seg button.on{background:#2e7d32;color:#fff}
+.seg button.on.b{background:#37474f}
+.item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eef2ec;gap:8px}
+.item:last-child{border:none}
+.item b{display:block}.item span{font-size:12px;color:#778}
+.tag{font-size:11px;padding:3px 8px;border-radius:10px;background:#e8f5e9;color:#2e7d32;font-weight:600;white-space:nowrap}
+.tag.red{background:#ffebee;color:#c62828}.tag.bf{background:#eceff1;color:#37474f}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 4px;text-align:right;border-bottom:1px solid #eef2ec}
+th:first-child,td:first-child{text-align:left}
+th{font-size:12px;color:#667;font-weight:600}
+tr.tot td{font-weight:700;border:none}
+.info{background:#e8f5e9;border-radius:10px;padding:10px;font-size:13px;margin-top:8px}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;display:flex;box-shadow:0 -2px 8px rgba(0,0,0,.1);z-index:5}
+nav button{flex:1;border:none;background:none;padding:8px 0 10px;font-size:11px;color:#778}
+nav button .i{font-size:22px;display:block}
+nav button.on{color:#2e7d32;font-weight:700}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{flex:1;padding:10px;border:none;border-radius:10px;background:#e8f0e5;color:#2e7d32;font-weight:600}
+.tabs button.on{background:#2e7d32;color:#fff}
+.sub{display:none}.sub.on{display:block}
+.empty{text-align:center;color:#999;padding:20px;font-size:14px}
+.bar{display:flex;align-items:flex-end;gap:6px;height:130px;margin-top:18px}
+.bar .col{flex:1;display:flex;flex-direction:column-reverse;height:100%;position:relative}
+.bar .c{background:#81c784}.bar .b{background:#78909c}
+.bar .col>span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:10px;color:#666}
+.bar .col em{font-size:9px;text-align:center;color:#333;font-style:normal}
+.legend{font-size:12px;margin-top:24px;display:flex;gap:14px;justify-content:center}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px}
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#323;color:#fff;padding:10px 18px;border-radius:20px;font-size:14px;opacity:0;transition:.3s;z-index:20;pointer-events:none}
+.toast.show{opacity:1}
+.alert{background:#fff3e0;border-left:4px solid #e65100;padding:10px;border-radius:8px;margin-bottom:8px;font-size:14px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>🐄🐃 <span data-t="app">Gau Dairy</span></h1><small id="today"></small></div>
+  <button class="lang" onclick="toggleLang()">मराठी / EN</button>
+</header>
+
+<main>
+<!-- HOME -->
+<section class="page active" id="p-home">
+  <div class="grid">
+    <div class="stat"><div class="l">🐄 <span data-t="cowToday">Cow Milk Today</span></div><div class="v" id="s-cmilk">0 L</div><div class="s" id="s-csale"></div></div>
+    <div class="stat buf"><div class="l">🐃 <span data-t="bufToday">Buffalo Milk Today</span></div><div class="v" id="s-bmilk">0 L</div><div class="s" id="s-bsale"></div></div>
+    <div class="stat"><div class="l" data-t="monthInc">Month Income</div><div class="v" id="s-income">₹0</div></div>
+    <div class="stat warn"><div class="l" data-t="monthExp">Month Expense</div><div class="v" id="s-exp">₹0</div></div>
+  </div>
+  <div class="card"><h2 data-t="balance">⚖️ Today's Milk Balance</h2><div id="bal"></div></div>
+  <div class="card"><h2 data-t="alerts">⚠️ Reminders</h2><div id="alerts"></div></div>
+  <div class="card"><h2 data-t="last7">📊 Last 7 Days Milk (L)</h2><div class="bar" id="chart"></div>
+    <div class="legend"><span><i style="background:#81c784"></i>🐄 Cow</span><span><i style="background:#78909c"></i>🐃 Buffalo</span></div></div>
+  <div class="card"><h2 data-t="profit">💰 This Month Profit</h2><div class="stat" style="box-shadow:none;padding:0;border:none"><div class="v" id="s-profit">₹0</div></div></div>
+</section>
+
+<!-- MILK -->
+<section class="page" id="p-milk">
+  <div class="tabs">
+    <button class="on" onclick="sub(this,'mk-prod','p-milk')" data-t="production">🥛 Production</button>
+    <button onclick="sub(this,'mk-sale','p-milk')" data-t="sale">🏪 Daily Sale</button>
+  </div>
+
+  <div class="sub on" id="mk-prod">
+    <div class="card">
+      <div class="seg" id="seg-m"><button class="on" onclick="setSeg('m','cow')">🐄 Cow / गाय</button><button class="b" onclick="setSeg('m','buf')">🐃 Buffalo / म्हैस</button></div>
+      <label data-t="date">Date</label><input type="date" id="m-date">
+      <label data-t="animal">Animal</label><select id="m-cow"></select>
+      <div class="row">
+        <div><label data-t="morning">Morning (L)</label><input type="number" step="0.1" id="m-am" inputmode="decimal"></div>
+        <div><label data-t="evening">Evening (L)</label><input type="number" step="0.1" id="m-pm" inputmode="decimal"></div>
+      </div>
+      <div class="row">
+        <div><label>Fat %</label><input type="number" step="0.1" id="m-fat" inputmode="decimal"></div>
+        <div><label>SNF %</label><input type="number" step="0.1" id="m-snf" inputmode="decimal"></div>
+      </div>
+      <button class="btn" onclick="saveMilk()" data-t="save">Save</button>
+    </div>
+    <div class="card"><h2 data-t="records">Recent Records</h2><div id="milk-list"></div></div>
+  </div>
+
+  <div class="sub" id="mk-sale">
+    <div class="card">
+      <div class="seg" id="seg-s"><button class="on" onclick="setSeg('s','cow')">🐄 Cow / गाय</button><button class="b" onclick="setSeg('s','buf')">🐃 Buffalo / म्हैस</button></div>
+      <div class="row">
+        <div><label data-t="date">Date</label><input type="date" id="sl-date" onchange="fillSale()"></div>
+        <div><label data-t="shift">Shift</label><select id="sl-shift"><option value="AM">Morning / सकाळ</option><option value="PM">Evening / संध्याकाळ</option></select></div>
+      </div>
+      <div class="info" id="sl-info"></div>
+      <div class="row">
+        <div><label data-t="litres">Litres</label><input type="number" step="0.1" id="sl-l" inputmode="decimal" oninput="calcSale()"></div>
+        <div><label>Fat %</label><input type="number" step="0.1" id="sl-fat" inputmode="decimal"></div>
+      </div>
+      <div class="row">
+        <div><label data-t="rate">Rate ₹/L</label><input type="number" step="0.1" id="sl-r" inputmode="decimal" oninput="calcSale()"></div>
+        <div><label data-t="buyer">Buyer</label><input id="sl-b" placeholder="Dairy / Name"></div>
+      </div>
+      <div class="info" id="sl-amt" style="font-size:16px;font-weight:700">= ₹0</div>
+      <button class="btn" onclick="saveSale()" data-t="saveSale">Save Sale</button>
+    </div>
+    <div class="card"><h2 data-t="saleRec">Sale Records</h2><div id="sale-list"></div></div>
+  </div>
+</section>
+
+<!-- ANIMALS -->
+<section class="page" id="p-cows">
+  <div class="card">
+    <h2 data-t="addCow">➕ Add Animal</h2>
+    <div class="seg" id="seg-c"><button class="on" onclick="setSeg('c','cow')">🐄 Cow / गाय</button><button class="b" onclick="setSeg('c','buf')">🐃 Buffalo / म्हैस</button></div>
+    <div class="row">
+      <div><label data-t="tag">Tag No.</label><input id="c-tag"></div>
+      <div><label data-t="name">Name</label><input id="c-name"></div>
+    </div>
+    <div class="row">
+      <div><label data-t="breed">Breed</label><select id="c-breed"></select></div>
+      <div><label data-t="dob">Birth Date</label><input type="date" id="c-dob"></div>
+    </div>
+    <label data-t="status">Status</label>
+    <select id="c-status"><option value="Milking">Milking / दुभती</option><option value="Dry">Dry / आटलेली</option><option value="Pregnant">Pregnant / गाभण</option><option value="Heifer">Heifer / कालवड / रेडी</option><option value="Calf">Calf / वासरू / रेडकू</option></select>
+    <button class="btn" onclick="saveCow()" data-t="save">Save</button>
+  </div>
+  <div class="card">
+    <h2 data-t="herd">My Herd</h2>
+    <div class="seg" id="seg-h"><button class="on" onclick="setSeg('h','all')">All</button><button onclick="setSeg('h','cow')">🐄 Cow</button><button class="b" onclick="setSeg('h','buf')">🐃 Buffalo</button></div>
+    <div id="cow-list"></div>
+  </div>
+</section>
+
+<!-- CARE -->
+<section class="page" id="p-health">
+  <div class="tabs">
+    <button class="on" onclick="sub(this,'h-health','p-health')" data-t="health">Health</button>
+    <button onclick="sub(this,'h-breed','p-health')" data-t="breeding">Breeding</button>
+    <button onclick="sub(this,'h-feed','p-health')" data-t="feed">Feed</button>
+  </div>
+  <div class="sub on" id="h-health">
+    <div class="card">
+      <h2 data-t="addHealth">💉 Treatment / Vaccine</h2>
+      <label data-t="animal">Animal</label><select class="cowsel" id="h-cow"></select>
+      <label data-t="type">Type</label>
+      <select id="h-type"><option>Vaccination – FMD</option><option>Vaccination – HS/BQ</option><option>Vaccination – Brucellosis</option><option>Vaccination – LSD</option><option>Deworming</option><option>Mastitis</option><option>Fever</option><option>Doctor Visit</option><option>Other</option></select>
+      <div class="row">
+        <div><label data-t="date">Date</label><input type="date" id="h-date"></div>
+        <div><label data-t="next">Next Due</label><input type="date" id="h-next"></div>
+      </div>
+      <label data-t="cost">Cost ₹</label><input type="number" id="h-cost" inputmode="numeric">
+      <label data-t="notes">Notes</label><input id="h-notes">
+      <button class="btn" onclick="saveHealth()" data-t="save">Save</button>
+    </div>
+    <div class="card"><h2 data-t="records">Recent Records</h2><div id="health-list"></div></div>
+  </div>
+  <div class="sub" id="h-breed">
+    <div class="card">
+      <h2 data-t="addAI">🧬 Heat / AI Record</h2>
+      <label data-t="animal">Animal</label><select class="cowsel" id="b-cow"></select>
+      <label data-t="aiDate">AI / Service Date</label><input type="date" id="b-date">
+      <label data-t="bull">Bull / Semen</label><input id="b-bull">
+      <p style="font-size:12px;color:#667;margin-top:8px" data-t="aiInfo">Auto: Pregnancy check at 60 days. Expected calving – Cow ~280 days, Buffalo ~310 days.</p>
+      <button class="btn" onclick="saveBreed()" data-t="save">Save</button>
+    </div>
+    <div class="card"><h2 data-t="records">Recent Records</h2><div id="breed-list"></div></div>
+  </div>
+  <div class="sub" id="h-feed">
+    <div class="card">
+      <h2 data-t="addFeed">🌾 Feed Given (Daily)</h2>
+      <div class="seg" id="seg-f"><button class="on" onclick="setSeg('f','both')">Both</button><button onclick="setSeg('f','cow')">🐄 Cow</button><button class="b" onclick="setSeg('f','buf')">🐃 Buffalo</button></div>
+      <label data-t="date">Date</label><input type="date" id="f-date">
+      <label data-t="feedType">Feed Type</label>
+      <select id="f-type"><option>Green Fodder / हिरवा चारा</option><option>Dry Fodder / कडबा</option><option>Silage / मुरघास</option><option>Cattle Feed / पशुखाद्य</option><option>Mineral Mixture</option><option>Cotton Cake / सरकी पेंड</option></select>
+      <div class="row">
+        <div><label data-t="qty">Qty (kg)</label><input type="number" id="f-qty" inputmode="decimal"></div>
+        <div><label data-t="cost">Cost ₹</label><input type="number" id="f-cost" inputmode="numeric"></div>
+      </div>
+      <button class="btn" onclick="saveFeed()" data-t="save">Save</button>
+    </div>
+    <div class="card"><h2 data-t="records">Recent Records</h2><div id="feed-list"></div></div>
+  </div>
+</section>
+
+<!-- MONEY -->
+<section class="page" id="p-money">
+  <div class="card"><h2 data-t="milkSum">🥛 This Month: Cow vs Buffalo</h2><div id="type-sum"></div></div>
+  <div class="card"><h2 data-t="summary">📒 This Month Profit & Loss</h2><div id="money-sum"></div></div>
+  <div class="card">
+    <h2 data-t="addTxn">💰 Add Income / Expense</h2>
+    <div class="row">
+      <div><label data-t="type">Type</label><select id="t-kind"><option value="exp">Expense / खर्च</option><option value="inc">Income / उत्पन्न</option></select></div>
+      <div><label data-t="date">Date</label><input type="date" id="t-date"></div>
+    </div>
+    <label data-t="category">Category</label>
+    <select id="t-cat"><option>Labour / मजुरी</option><option>Electricity</option><option>Medicine</option><option>Equipment</option><option>Animal Purchase</option><option>Animal Sale</option><option>Dung / Manure Sale</option><option>Calf Sale</option><option>Loan EMI</option><option>Other</option></select>
+    <label data-t="amount">Amount ₹</label><input type="number" id="t-amt" inputmode="numeric">
+    <label data-t="notes">Notes</label><input id="t-notes">
+    <button class="btn" onclick="saveTxn()" data-t="save">Save</button>
+  </div>
+  <div class="card"><h2 data-t="records">Recent Records</h2><div id="money-list"></div></div>
+  <div class="card">
+    <h2 data-t="backup">🔒 Backup & Reports</h2>
+    <button class="btn sec" onclick="exportCSV()" data-t="csv">Download Milk Production Report (Excel)</button>
+    <button class="btn sec" onclick="exportSalesCSV()" data-t="csv2">Download Milk Sale Report (Excel)</button>
+    <button class="btn sec" onclick="exportData()" data-t="export">Export Backup File</button>
+    <button class="btn sec" onclick="document.getElementById('imp').click()" data-t="import">Restore Backup</button>
+    <input type="file" id="imp" accept=".json" style="display:none" onchange="importData(event)">
+  </div>
+</section>
+</main>
+
+<nav>
+  <button class="on" onclick="go('home',this)"><span class="i">🏠</span><span data-t="nHome">Home</span></button>
+  <button onclick="go('milk',this)"><span class="i">🥛</span><span data-t="nMilk">Milk</span></button>
+  <button onclick="go('cows',this)"><span class="i">🐄</span><span data-t="nCows">Animals</span></button>
+  <button onclick="go('health',this)"><span class="i">💉</span><span data-t="nHealth">Care</span></button>
+  <button onclick="go('money',this)"><span class="i">💰</span><span data-t="nMoney">Money</span></button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY='gauDairyV1';
+let D=JSON.parse(localStorage.getItem(KEY)||'null')||{};
+['cows','milk','sales','health','breed','feed','txn'].forEach(k=>D[k]=D[k]||[]);
+// migrate old data (v1 had only cows)
+D.cows.forEach(c=>c.type=c.type||'cow');
+D.milk.forEach(m=>{if(!m.type){const c=D.cows.find(c=>c.id===m.cow);m.type=c?c.type:'cow'}});
+D.sales.forEach(s=>{s.type=s.type||'cow';s.shift=s.shift||'AM'});
+
+const BREEDS={cow:['Gir','Sahiwal','Khillar','Deoni','Red Kandhari','Dangi','HF','Jersey','Crossbred','Other'],
+              buf:['Murrah','Pandharpuri','Jaffarabadi','Mehsana','Surti','Nagpuri','Nili-Ravi','Graded / Desi','Other']};
+const GEST={cow:280,buf:310};
+const ICON={cow:'🐄',buf:'🐃'};
+const TNAME={cow:'Cow / गाय',buf:'Buffalo / म्हैस'};
+let SEG={m:'cow',s:'cow',c:'cow',h:'all',f:'both'};
+
+let lang=localStorage.getItem(KEY+'lang')||'en';
+const MR={app:'गौ डेअरी',cowToday:'आजचे गाय दूध',bufToday:'आजचे म्हैस दूध',monthInc:'महिन्याचे उत्पन्न',monthExp:'महिन्याचा खर्च',balance:'⚖️ आजचा दूध हिशोब',alerts:'⚠️ आठवण',last7:'📊 मागील ७ दिवसांचे दूध (लि.)',profit:'💰 या महिन्याचा नफा',production:'🥛 उत्पादन',sale:'🏪 रोजची विक्री',date:'तारीख',animal:'जनावर',morning:'सकाळ (लि.)',evening:'संध्याकाळ (लि.)',save:'जतन करा',saveSale:'विक्री जतन करा',shift:'वेळ',litres:'लिटर',rate:'दर ₹/लि.',buyer:'खरेदीदार',records:'अलीकडील नोंदी',saleRec:'विक्री नोंदी',addCow:'➕ जनावर जोडा',tag:'टॅग नं.',name:'नाव',breed:'जात',dob:'जन्म तारीख',status:'स्थिती',herd:'माझा कळप',health:'आरोग्य',breeding:'प्रजनन',feed:'चारा',addHealth:'💉 उपचार / लसीकरण',type:'प्रकार',next:'पुढील तारीख',cost:'खर्च ₹',notes:'टीप',addAI:'🧬 माज / कृत्रिम रेतन',aiDate:'रेतन तारीख',bull:'वळू / सीमेन',aiInfo:'आपोआप: ६० दिवसांनी गाभण तपासणी. अपेक्षित वेत – गाय ~२८० दिवस, म्हैस ~३१० दिवस.',addFeed:'🌾 दिलेला चारा (रोज)',feedType:'चाऱ्याचा प्रकार',qty:'प्रमाण (किलो)',addTxn:'💰 उत्पन्न / खर्च जोडा',category:'वर्ग',amount:'रक्कम ₹',milkSum:'🥛 या महिन्यात: गाय विरुद्ध म्हैस',summary:'📒 या महिन्याचा नफा-तोटा',backup:'🔒 बॅकअप व अहवाल',export:'बॅकअप फाईल काढा',import:'बॅकअप परत आणा',csv:'दूध उत्पादन अहवाल (Excel)',csv2:'दूध विक्री अहवाल (Excel)',nHome:'मुख्य',nMilk:'दूध',nCows:'जनावरे',nHealth:'काळजी',nMoney:'पैसे'};
+const EN={};document.querySelectorAll('[data-t]').forEach(e=>EN[e.dataset.t]=e.textContent);
+const t=k=>lang==='mr'?(MR[k]||EN[k]):EN[k];
+function applyLang(){document.querySelectorAll('[data-t]').forEach(e=>e.textContent=t(e.dataset.t))}
+function toggleLang(){lang=lang==='en'?'mr':'en';localStorage.setItem(KEY+'lang',lang);applyLang();render()}
+
+const today=()=>{const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)};
+const ym=()=>today().slice(0,7);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const $=id=>document.getElementById(id);
+const v=id=>$(id).value.trim();
+const num=id=>parseFloat($(id).value)||0;
+const rs=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+const L=n=>(+n).toFixed(1)+' L';
+const addDays=(d,n)=>{const x=new Date(d+'T00:00:00');x.setDate(x.getDate()+n);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+const fmt=d=>new Date(d+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short'});
+const animal=id=>D.cows.find(c=>c.id===id);
+const cowName=(id,type)=>{const c=animal(id);return c?`${ICON[c.type]} ${c.tag} ${c.name}`:`${ICON[type]||''} All ${type==='buf'?'Buffaloes / सर्व म्हशी':'Cows / सर्व गायी'}`};
+function persist(){localStorage.setItem(KEY,JSON.stringify(D));render()}
+function toast(m){const e=$('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1800)}
+function clr(...ids){ids.forEach(i=>$(i).value='')}
+function del(col,id){if(confirm('Delete? / हटवायचे?')){D[col]=D[col].filter(x=>x.id!==id);persist()}}
+
+function go(p,b){document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));$('p-'+p).classList.add('active');
+  document.querySelectorAll('nav button').forEach(e=>e.classList.remove('on'));b.classList.add('on');scrollTo(0,0)}
+function sub(b,id,page){b.parentNode.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+  document.querySelectorAll('#'+page+' .sub').forEach(x=>x.classList.remove('on'));$(id).classList.add('on');if(id==='mk-sale')fillSale()}
+function setSeg(g,val){SEG[g]=val;const vals={m:['cow','buf'],s:['cow','buf'],c:['cow','buf'],h:['all','cow','buf'],f:['both','cow','buf']}[g];
+  $('seg-'+g).querySelectorAll('button').forEach((b,i)=>b.classList.toggle('on',vals[i]===val));
+  if(g==='c')$('c-breed').innerHTML=BREEDS[val].map(b=>`<option>${b}</option>`).join('');
+  if(g==='s')fillSale();
+  render()}
+
+// ---- calculations
+const prodOn=(d,type)=>D.milk.filter(m=>m.date===d&&m.type===type).reduce((a,m)=>a+m.am+m.pm,0);
+const prodShift=(d,type,sh)=>D.milk.filter(m=>m.date===d&&m.type===type).reduce((a,m)=>a+(sh==='AM'?m.am:m.pm),0);
+const soldOn=(d,type,sh)=>D.sales.filter(s=>s.date===d&&s.type===type&&(!sh||s.shift===sh)).reduce((a,s)=>a+s.l,0);
+const saleAmtOn=(d,type)=>D.sales.filter(s=>s.date===d&&s.type===type).reduce((a,s)=>a+s.l*s.r,0);
+function monthType(type){const m=ym();
+  const prod=D.milk.filter(x=>x.type===type&&x.date.startsWith(m)).reduce((a,x)=>a+x.am+x.pm,0);
+  const ss=D.sales.filter(x=>x.type===type&&x.date.startsWith(m));
+  const sold=ss.reduce((a,x)=>a+x.l,0),amt=ss.reduce((a,x)=>a+x.l*x.r,0);
+  const feed=D.feed.filter(x=>x.date.startsWith(m)&&(x.for===type)).reduce((a,x)=>a+x.cost,0);
+  const med=D.health.filter(x=>x.date.startsWith(m)&&animal(x.cow)?.type===type).reduce((a,x)=>a+x.cost,0);
+  const fats=ss.filter(x=>x.fat);const avgFat=fats.length?fats.reduce((a,x)=>a+x.fat,0)/fats.length:0;
+  return{prod,sold,amt,rate:sold?amt/sold:0,feed,med,avgFat,count:D.cows.filter(c=>c.type===type&&c.status==='Milking').length}}
+function monthTotals(){const m=ym(),C=monthType('cow'),B=monthType('buf');
+  const othInc=D.txn.filter(x=>x.kind==='inc'&&x.date.startsWith(m)).reduce((a,x)=>a+x.amt,0);
+  const feedExp=D.feed.filter(x=>x.date.startsWith(m)).reduce((a,x)=>a+x.cost,0);
+  const medExp=D.health.filter(x=>x.date.startsWith(m)).reduce((a,x)=>a+x.cost,0);
+  const othExp=D.txn.filter(x=>x.kind==='exp'&&x.date.startsWith(m)).reduce((a,x)=>a+x.amt,0);
+  return{C,B,othInc,feedExp,medExp,othExp,inc:C.amt+B.amt+othInc,exp:feedExp+medExp+othExp}}
+
+// ---- save
+function saveCow(){if(!v('c-tag')&&!v('c-name'))return toast('Enter tag or name');
+  D.cows.push({id:uid(),type:SEG.c,tag:v('c-tag'),name:v('c-name'),breed:v('c-breed'),dob:v('c-dob'),status:v('c-status')});
+  clr('c-tag','c-name','c-dob');persist();toast('✅ '+ICON[SEG.c]+' Saved')}
+function setStatus(id,s){animal(id).status=s;persist()}
+function saveMilk(){const am=num('m-am'),pm=num('m-pm');if(!am&&!pm)return toast('Enter milk');
+  D.milk.push({id:uid(),type:SEG.m,date:v('m-date'),cow:v('m-cow'),am,pm,fat:num('m-fat'),snf:num('m-snf')});
+  clr('m-am','m-pm','m-fat','m-snf');persist();toast('✅ '+ICON[SEG.m]+' '+L(am+pm))}
+function fillSale(){const d=v('sl-date')||today(),ty=SEG.s,sh=v('sl-shift');
+  const p=prodShift(d,ty,sh),s=soldOn(d,ty,sh),bal=Math.max(p-s,0);
+  $('sl-info').innerHTML=`${ICON[ty]} ${sh==='AM'?'Morning':'Evening'} – Produced: <b>${L(p)}</b> • Sold: <b>${L(s)}</b> • Left: <b>${L(bal)}</b>`;
+  $('sl-l').value=bal?bal.toFixed(1):'';
+  $('sl-r').value=localStorage.getItem(KEY+'rate_'+ty)||'';calcSale()}
+function calcSale(){$('sl-amt').textContent='= '+rs(num('sl-l')*num('sl-r'))}
+function saveSale(){const l=num('sl-l'),r=num('sl-r');if(!l||!r)return toast('Enter litres & rate');
+  D.sales.push({id:uid(),type:SEG.s,date:v('sl-date'),shift:v('sl-shift'),l,r,fat:num('sl-fat'),buyer:v('sl-b')});
+  localStorage.setItem(KEY+'rate_'+SEG.s,r);clr('sl-fat');persist();fillSale();toast('✅ '+ICON[SEG.s]+' '+rs(l*r))}
+function saveHealth(){if(!v('h-cow'))return toast('Add animal first');
+  D.health.push({id:uid(),cow:v('h-cow'),type:v('h-type'),date:v('h-date'),next:v('h-next'),cost:num('h-cost'),notes:v('h-notes')});
+  clr('h-next','h-cost','h-notes');persist();toast('✅ Saved')}
+function saveBreed(){if(!v('b-cow'))return toast('Add animal first');if(!v('b-date'))return toast('Select date');
+  const d=v('b-date'),ty=animal(v('b-cow')).type;
+  D.breed.push({id:uid(),cow:v('b-cow'),date:d,bull:v('b-bull'),pd:addDays(d,60),calving:addDays(d,GEST[ty])});
+  clr('b-bull');persist();toast('✅ Calving ~ '+fmt(addDays(d,GEST[ty])))}
+function saveFeed(){const c=num('f-cost');if(!c&&!num('f-qty'))return toast('Enter qty/cost');
+  D.feed.push({id:uid(),for:SEG.f,date:v('f-date'),type:v('f-type'),qty:num('f-qty'),cost:c});clr('f-qty','f-cost');persist();toast('✅ Saved')}
+function saveTxn(){const a=num('t-amt');if(!a)return toast('Enter amount');
+  D.txn.push({id:uid(),kind:v('t-kind'),date:v('t-date'),cat:v('t-cat'),amt:a,notes:v('t-notes')});clr('t-amt','t-notes');persist();toast('✅ Saved')}
+
+// ---- render
+function render(){
+  const td=today();
+  // selects
+  const prev=$('m-cow').value;
+  $('m-cow').innerHTML=`<option value="">${ICON[SEG.m]} All ${SEG.m==='buf'?'Buffaloes total / सर्व म्हशी':'Cows total / सर्व गायी'}</option>`+
+    D.cows.filter(c=>c.type===SEG.m).map(c=>`<option value="${c.id}">${c.tag} ${c.name}</option>`).join('');
+  if([...$('m-cow').options].some(o=>o.value===prev))$('m-cow').value=prev;
+  const opts=D.cows.map(c=>`<option value="${c.id}">${ICON[c.type]} ${c.tag} ${c.name}</option>`).join('');
+  document.querySelectorAll('.cowsel').forEach(s=>{const p=s.value;s.innerHTML=opts||'<option value="">Add animal first</option>';if(p)s.value=p});
+
+  // home stats
+  const cP=prodOn(td,'cow'),bP=prodOn(td,'buf');
+  $('s-cmilk').textContent=L(cP);$('s-bmilk').textContent=L(bP);
+  $('s-csale').textContent=`Sold ${L(soldOn(td,'cow'))} • ${rs(saleAmtOn(td,'cow'))}`;
+  $('s-bsale').textContent=`Sold ${L(soldOn(td,'buf'))} • ${rs(saleAmtOn(td,'buf'))}`;
+  const T=monthTotals();
+  $('s-income').textContent=rs(T.inc);$('s-exp').textContent=rs(T.exp);
+  $('s-profit').textContent=rs(T.inc-T.exp);$('s-profit').style.color=T.inc-T.exp<0?'#c62828':'#2e7d32';
+
+  // balance table
+  const row=(ty)=>{const p=prodOn(td,ty),s=soldOn(td,ty);return`<tr><td>${ICON[ty]} ${ty==='cow'?'Cow':'Buffalo'}</td><td>${L(p)}</td><td>${L(s)}</td><td>${L(Math.max(p-s,0))}</td><td>${rs(saleAmtOn(td,ty))}</td></tr>`};
+  $('bal').innerHTML=`<table><tr><th></th><th>Produced</th><th>Sold</th><th>Home/Left</th><th>₹</th></tr>${row('cow')}${row('buf')}
+    <tr class="tot"><td>Total</td><td>${L(cP+bP)}</td><td>${L(soldOn(td,'cow')+soldOn(td,'buf'))}</td><td>${L(Math.max(cP-soldOn(td,'cow'),0)+Math.max(bP-soldOn(td,'buf'),0))}</td><td>${rs(saleAmtOn(td,'cow')+saleAmtOn(td,'buf'))}</td></tr></table>`;
+
+  // chart (stacked)
+  const days=[...Array(7)].map((_,i)=>addDays(td,i-6));
+  const cv=days.map(d=>prodOn(d,'cow')),bv=days.map(d=>prodOn(d,'buf'));
+  const mx=Math.max(...days.map((_,i)=>cv[i]+bv[i]),1)*1.15;
+  $('chart').innerHTML=days.map((d,i)=>`<div class="col"><span>${d.slice(8)}</span><div class="c" style="height:${cv[i]/mx*100}%"></div><div class="b" style="height:${bv[i]/mx*100}%"></div><em>${cv[i]+bv[i]?(cv[i]+bv[i]).toFixed(0):''}</em></div>`).join('');
+
+  // alerts
+  const soon=addDays(td,7);let al=[];
+  D.health.filter(h=>h.next&&h.next<=soon&&h.next>=addDays(td,-3)).forEach(h=>al.push(`💉 ${cowName(h.cow)}: ${h.type} – ${fmt(h.next)}`));
+  D.breed.forEach(b=>{if(b.pd>=addDays(td,-3)&&b.pd<=soon)al.push(`🩺 ${cowName(b.cow)}: Pregnancy check / गाभण तपासणी – ${fmt(b.pd)}`);
+    if(b.calving>=td&&b.calving<=addDays(td,15))al.push(`🍼 ${cowName(b.cow)}: Calving / वेत – ${fmt(b.calving)}`)});
+  ['cow','buf'].forEach(ty=>{if(D.cows.some(c=>c.type===ty&&c.status==='Milking')&&!D.milk.some(m=>m.date===td&&m.type===ty))
+    al.push(`${ICON[ty]} Today's ${ty==='cow'?'cow':'buffalo'} milk not recorded / आजचे ${ty==='cow'?'गाय':'म्हैस'} दूध नोंदवले नाही`)});
+  ['cow','buf'].forEach(ty=>{const p=prodOn(td,ty),s=soldOn(td,ty);if(p>0&&s===0)al.push(`🏪 ${ICON[ty]} Today's sale not entered / आजची विक्री नोंदवली नाही`)});
+  $('alerts').innerHTML=al.length?al.map(a=>`<div class="alert">${a}</div>`).join(''):'<div class="empty">✅ All good / सर्व ठीक</div>';
+
+  // herd
+  const herd=D.cows.filter(c=>SEG.h==='all'||c.type===SEG.h);
+  $('cow-list').innerHTML=herd.length?herd.map(c=>{
+    const tot=D.milk.filter(m=>m.cow===c.id&&m.date.startsWith(ym())).reduce((a,m)=>a+m.am+m.pm,0);
+    return`<div class="item"><div><b>${ICON[c.type]} ${c.tag} ${c.name}</b><span>${c.breed}${c.dob?' • '+c.dob:''} • This month: ${L(tot)}</span></div>
+    <div style="text-align:right"><select onchange="setStatus('${c.id}',this.value)" style="padding:4px;font-size:12px;width:auto">${['Milking','Dry','Pregnant','Heifer','Calf'].map(s=>`<option ${s===c.status?'selected':''}>${s}</option>`).join('')}</select>
+    <br><button class="btn small del" style="margin-top:4px" onclick="del('cows','${c.id}')">🗑</button></div></div>`}).join('')
+    +`<div class="info">🐄 Cows: ${D.cows.filter(c=>c.type==='cow').length} • 🐃 Buffaloes: ${D.cows.filter(c=>c.type==='buf').length}</div>`
+    :'<div class="empty">No animals added yet / अजून जनावर जोडलेले नाही</div>';
+
+  // milk list
+  const ml=[...D.milk].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,25);
+  $('milk-list').innerHTML=ml.length?ml.map(m=>`<div class="item"><div><b>${L(m.am+m.pm)} – ${cowName(m.cow,m.type)}</b><span>${fmt(m.date)} • AM ${m.am} / PM ${m.pm}${m.fat?' • Fat '+m.fat:''}${m.snf?' • SNF '+m.snf:''}</span></div><button class="btn small del" onclick="del('milk','${m.id}')">🗑</button></div>`).join(''):'<div class="empty">No records</div>';
+  const sl=[...D.sales].sort((a,b)=>b.date.localeCompare(a.date)||b.shift.localeCompare(a.shift)).slice(0,25);
+  $('sale-list').innerHTML=sl.length?sl.map(s=>`<div class="item"><div><b>${ICON[s.type]} ${s.l} L × ₹${s.r} = ${rs(s.l*s.r)}</b><span>${fmt(s.date)} • ${s.shift==='AM'?'Morning':'Evening'}${s.fat?' • Fat '+s.fat:''} • ${s.buyer||'-'}</span></div><button class="btn small del" onclick="del('sales','${s.id}')">🗑</button></div>`).join(''):'<div class="empty">No records</div>';
+
+  // care lists
+  $('health-list').innerHTML=D.health.length?[...D.health].reverse().slice(0,20).map(h=>`<div class="item"><div><b>${h.type}</b><span>${cowName(h.cow)} • ${fmt(h.date)}${h.next?' • Next: '+fmt(h.next):''}${h.cost?' • '+rs(h.cost):''}${h.notes?' • '+h.notes:''}</span></div><button class="btn small del" onclick="del('health','${h.id}')">🗑</button></div>`).join(''):'<div class="empty">No records</div>';
+  $('breed-list').innerHTML=D.breed.length?[...D.breed].reverse().map(b=>`<div class="item"><div><b>${cowName(b.cow)}</b><span>AI: ${fmt(b.date)} • PD: ${fmt(b.pd)} • Calving: ${fmt(b.calving)}${b.bull?' • '+b.bull:''}</span></div><button class="btn small del" onclick="del('breed','${b.id}')">🗑</button></div>`).join(''):'<div class="empty">No records</div>';
+  const fl={both:'Both',cow:'🐄',buf:'🐃'};
+  $('feed-list').innerHTML=D.feed.length?[...D.feed].reverse().slice(0,20).map(f=>`<div class="item"><div><b>${fl[f.for||'both']} ${f.type}</b><span>${fmt(f.date)} • ${f.qty} kg • ${rs(f.cost)}</span></div><button class="btn small del" onclick="del('feed','${f.id}')">🗑</button></div>`).join(''):'<div class="empty">No records</div>';
+
+  // money: cow vs buffalo
+  const C=T.C,B=T.B;
+  $('type-sum').innerHTML=`<table><tr><th></th><th>🐄 Cow</th><th>🐃 Buffalo</th></tr>
+    <tr><td>Milking animals</td><td>${C.count}</td><td>${B.count}</td></tr>
+    <tr><td>Milk produced</td><td>${L(C.prod)}</td><td>${L(B.prod)}</td></tr>
+    <tr><td>Milk sold</td><td>${L(C.sold)}</td><td>${L(B.sold)}</td></tr>
+    <tr><td>Avg rate ₹/L</td><td>${C.rate.toFixed(1)}</td><td>${B.rate.toFixed(1)}</td></tr>
+    <tr><td>Avg fat %</td><td>${C.avgFat?C.avgFat.toFixed(1):'-'}</td><td>${B.avgFat?B.avgFat.toFixed(1):'-'}</td></tr>
+    <tr><td>Sale income</td><td>${rs(C.amt)}</td><td>${rs(B.amt)}</td></tr>
+    <tr><td>Feed (direct)</td><td>${rs(C.feed)}</td><td>${rs(B.feed)}</td></tr>
+    <tr><td>Medical</td><td>${rs(C.med)}</td><td>${rs(B.med)}</td></tr>
+    <tr class="tot"><td>Margin</td><td>${rs(C.amt-C.feed-C.med)}</td><td>${rs(B.amt-B.feed-B.med)}</td></tr></table>
+    <div class="info">Feed marked "Both" counts only in the total P&L below. / "Both" चारा फक्त एकूण हिशोबात.</div>`;
+  $('money-sum').innerHTML=`
+    <div class="item"><div><b>🐄 Cow milk sale / गाय दूध</b></div><span class="tag">${rs(C.amt)}</span></div>
+    <div class="item"><div><b>🐃 Buffalo milk sale / म्हैस दूध</b></div><span class="tag bf">${rs(B.amt)}</span></div>
+    <div class="item"><div><b>➕ Other income / इतर उत्पन्न</b></div><span class="tag">${rs(T.othInc)}</span></div>
+    <div class="item"><div><b>🌾 Feed / चारा</b></div><span class="tag red">${rs(T.feedExp)}</span></div>
+    <div class="item"><div><b>💉 Medical / औषध</b></div><span class="tag red">${rs(T.medExp)}</span></div>
+    <div class="item"><div><b>📦 Other expense / इतर खर्च</b></div><span class="tag red">${rs(T.othExp)}</span></div>
+    <div class="item"><div><b>= Profit / नफा</b></div><b style="color:${T.inc-T.exp<0?'#c62828':'#2e7d32'}">${rs(T.inc-T.exp)}</b></div>`;
+  $('money-list').innerHTML=D.txn.length?[...D.txn].reverse().slice(0,20).map(x=>`<div class="item"><div><b>${x.cat}</b><span>${fmt(x.date)}${x.notes?' • '+x.notes:''}</span></div><div><span class="tag ${x.kind==='exp'?'red':''}">${x.kind==='exp'?'-':'+'}${rs(x.amt)}</span> <button class="btn small del" onclick="del('txn','${x.id}')">🗑</button></div></div>`).join(''):'<div class="empty">No records</div>';
+}
+
+// ---- backup / reports
+function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+text],{type}));a.download=name;a.click()}
+function exportData(){download('gau-dairy-backup-'+today()+'.json',JSON.stringify(D),'application/json');toast('✅ Backup saved')}
+function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const x=JSON.parse(r.result);if(!x.cows)throw 0;localStorage.setItem(KEY,JSON.stringify(x));location.reload()}catch{toast('❌ Invalid file')}};r.readAsText(f)}
+function exportCSV(){let s='Date,Type,Animal,Morning L,Evening L,Total L,Fat,SNF\n';
+  [...D.milk].sort((a,b)=>a.date.localeCompare(b.date)).forEach(m=>{const c=animal(m.cow);
+    s+=`${m.date},${m.type==='buf'?'Buffalo':'Cow'},"${c?c.tag+' '+c.name:'All'}",${m.am},${m.pm},${(m.am+m.pm).toFixed(1)},${m.fat||''},${m.snf||''}\n`});
+  download('milk-production-'+today()+'.csv',s,'text/csv')}
+function exportSalesCSV(){let s='Date,Shift,Type,Litres,Fat,Rate,Amount,Buyer\n';
+  [...D.sales].sort((a,b)=>a.date.localeCompare(b.date)).forEach(x=>s+=`${x.date},${x.shift},${x.type==='buf'?'Buffalo':'Cow'},${x.l},${x.fat||''},${x.r},${(x.l*x.r).toFixed(2)},"${x.buyer||''}"\n`);
+  download('milk-sales-'+today()+'.csv',s,'text/csv')}
+
+// ---- init
+['m-date','sl-date','h-date','b-date','f-date','t-date'].forEach(i=>$(i).value=today());
+$('sl-shift').value=new Date().getHours()<14?'AM':'PM';
+$('sl-shift').onchange=fillSale;
+$('c-breed').innerHTML=BREEDS.cow.map(b=>`<option>${b}</option>`).join('');
+$('today').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+applyLang();localStorage.setItem(KEY,JSON.stringify(D));render();fillSale();
+</script>
+</body>
+</html>
